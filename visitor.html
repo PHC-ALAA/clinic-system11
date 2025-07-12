@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>شاشة الزوار</title>
+  <style>
+    body { font-size: 26px; font-family: 'Segoe UI', sans-serif; background: linear-gradient(to bottom, #e0f7ff, #f8fcff); padding: 30px; text-align: center; }
+    table { width: 100%; border-collapse: collapse; font-size: 28px; text-align: center; background-color: white; }
+    th, td { border: 1px solid #3a78b4; padding: 15px; }
+    th { background-color: #b0d4f1; color: #003366; }
+    .blink-row { animation: blink 1s linear infinite; }
+    @keyframes blink {
+      0%, 100% { background-color: #fff; }
+      50% { background-color: yellow; }
+    }
+    .footer { margin-top: 40px; font-size: 22px; color: #003366; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <table>
+    <thead>
+      <tr>
+        <th>رقم العيادة</th>
+        <th>في الخدمة الآن</th>
+        <th>الحالة</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr id="row1"><td>1</td><td id="name1"></td><td id="status1"></td></tr>
+      <tr id="row2"><td>2</td><td id="name2"></td><td id="status2"></td></tr>
+      <tr id="row3"><td>3</td><td id="name3"></td><td id="status3"></td></tr>
+      <tr id="row4"><td>4</td><td id="name4"></td><td id="status4"></td></tr>
+      <tr id="row5"><td>5</td><td id="name5"></td><td id="status5"></td></tr>
+    </tbody>
+  </table>
+
+  <div class="footer">
+    نرحب بكم، حرصًا على تنظيم الخدمة تعطى الأولوية لمن لديهم موعد، ونؤمن أن كل مراجع يستحق العناية الكاملة.
+  </div>
+
+  <script>
+    const channel = new BroadcastChannel("clinicChannel");
+
+    channel.onmessage = (event) => {
+      const data = event.data;
+      const i = data.clinic;
+      document.getElementById("name" + i).textContent = `${data.name} - ${data.id.slice(-2)}`;
+      document.getElementById("status" + i).textContent = data.status;
+
+      const row = document.getElementById("row" + i);
+      row.classList.add("blink-row");
+      setTimeout(() => row.classList.remove("blink-row"), 20000);
+
+      const lastTwo = data.id.slice(-2).split('').join(' ');
+      const msg = `يرجى من المراجع ${data.name}، المنتهي برقم هوية ${lastTwo}، الدخول إلى العيادة رقم ${i}`;
+      const utterance = new SpeechSynthesisUtterance(msg);
+      utterance.lang = "ar-SA";
+      const voices = window.speechSynthesis.getVoices();
+      utterance.voice = voices.find(v => v.name.includes("female") || v.name.includes("أنثى")) || null;
+      speechSynthesis.speak(utterance);
+    };
+  </script>
+</body>
+</html>

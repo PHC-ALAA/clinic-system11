@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>شاشة التحكم</title>
+  <style>
+    body { font-size: 22px; font-family: Arial, sans-serif; background: linear-gradient(to bottom, #f0f8ff, #e0f0ff); padding: 20px; }
+    input, select, button { font-size: 20px; padding: 6px 10px; margin: 5px 0; }
+    button { cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h2>لوحة التحكم - نداء المراجعين</h2>
+  <label>🧍‍♂️ اسم المراجع:</label><br>
+  <input id="name" type="text"><br><br>
+
+  <label>🆔 رقم الهوية:</label><br>
+  <input id="id" type="text" maxlength="10"><br><br>
+
+  <label>🏥 رقم العيادة:</label><br>
+  <select id="clinic">
+    <option value="1">عيادة 1</option>
+    <option value="2">عيادة 2</option>
+    <option value="3">عيادة 3</option>
+    <option value="4">عيادة 4</option>
+    <option value="5">عيادة 5</option>
+  </select><br><br>
+
+  <label>📅 الحالة:</label><br>
+  <select id="status">
+    <option value="بموعد">بموعد</option>
+    <option value="بدون موعد">بدون موعد</option>
+  </select><br><br>
+
+  <button onclick="callNow()">🔘 نداء</button>
+  <button onclick="recall()">🔁 إعادة النداء</button>
+
+  <script>
+    const channel = new BroadcastChannel("clinicChannel");
+    let lastData = null;
+
+    function callNow() {
+      const name = document.getElementById("name").value.trim();
+      const id = document.getElementById("id").value.trim();
+      const clinic = document.getElementById("clinic").value;
+      const status = document.getElementById("status").value;
+
+      if (!name || !/^[\u0600-\u06FFa-zA-Z\s]+$/.test(name)) return alert("الاسم يجب أن يكون بالحروف فقط");
+      if (!/^[0-9]{10}$/.test(id)) return alert("رقم الهوية يجب أن يكون 10 أرقام");
+
+      const data = { name, id, clinic, status };
+      lastData = data;
+      channel.postMessage(data);
+    }
+
+    function recall() {
+      if (lastData) {
+        channel.postMessage(lastData);
+      } else {
+        alert("لم يتم نداء أي اسم بعد");
+      }
+    }
+  </script>
+</body>
+</html>
